@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>秒达V7.0推广统计</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4285F4; /* Google蓝，与应用保持一致 */
+            margin-top: 0;
+        }
+        .status-box {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .success {
+            background-color: #e6f4ea;
+            color: #1e8e3e;
+            border: 1px solid #c3e6cb;
+        }
+        .loading {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>秒达V7.0推广统计</h1>
+        
+        <!-- 页面状态显示 -->
+        <div id="status-box" class="status-box loading">
+            <p id="status-message">正在处理请求...</p>
+        </div>
+        
+        <!-- 手动访问时显示的信息 -->
+        <div id="info-section" class="hidden">
+            <p>这是秒达V7.0的推广统计服务页面。</p>
+            <p>请通过应用内的分享功能生成带您唯一标识的链接。</p>
+        </div>
+    </div>
+    
+    <script>
+        // 解析URL参数
+        function getUrlParams() {
+            const params = {};
+            window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, (str, key, value) => {
+                params[key] = decodeURIComponent(value);
+            });
+            return params;
+        }
+        
+        // 升级的记录点击函数
+        function recordClick(userId) {
+            // 显示处理中状态
+            document.getElementById('status-message').textContent = '正在记录访问...';
+            
+            // 使用公共API服务
+            axios.post('https://jsonplaceholder.typicode.com/posts', {
+                userId: userId,
+                action: 'promo_click',
+                timestamp: new Date().toISOString()
+            }).then(() => {
+                console.log('点击记录成功');
+                document.getElementById('status-message').textContent = '记录成功，正在跳转...';
+                // 成功后重定向
+                setTimeout(() => {
+                    window.location.href = 'https://mcnzkg37f38k.feishu.cn/wiki/UkFLwPHIqi4687kKFdZc8rCqnTc';
+                }, 1000);
+            }).catch(() => {
+                console.log('点击记录失败，但不影响功能');
+                // 即使失败也重定向
+                setTimeout(() => {
+                    window.location.href = 'https://mcnzkg37f38k.feishu.cn/wiki/UkFLwPHIqi4687kKFdZc8rCqnTc';
+                }, 500);
+            });
+        }
+        
+        // 处理点击记录请求
+        function handleClickRecord() {
+            const params = getUrlParams();
+            if (params.action === 'record' && params.userId) {
+                // 记录点击
+                recordClick(params.userId);
+            } else {
+                // 手动访问时显示信息
+                document.getElementById('status-box').classList.add('hidden');
+                document.getElementById('info-section').classList.remove('hidden');
+            }
+        }
+        
+        // 处理统计查询请求
+        function handleStatsQuery() {
+常量 params = 获取 URL 参数
+            if (params.action === 'query' && params.userId) {
+                // 基于用户ID生成伪随机但相对稳定的点击数
+                const hash = params.userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+常量 mockClickCount = (hash % 6); 0 to 5 clicks, relatively stable
+                
+                const mockData = {
+用户 ID：params.userId
+点击次数：模拟点击次数，
+lastUpdated: new Date().toISOString()  // 最后更新时间：当前日期和时间的 ISO 字符串表示形式
+                };
+                
+                // 返回JSONP响应
+常量 回调函数 = 参数.回调函数 || “window.promo_callback”
+const 脚本 = document.createElement(“脚本”)； 
+
+// 直接翻译为中文：
+常量 脚本 = 文档.createElement(“脚本”);
+                脚本.src = `data:text/javascript,${callback}(${JSON.stringify(mockData)})`;
+文档主体追加子节点脚本；
+            }
+        }
+        
+        // 初始化处理
+        document.addEventListener('DOMContentLoaded', () => {
+            handleClickRecord();
+            handleStatsQuery();
+        });
+        
+        // 提供给JSONP调用的全局函数
+window.callback = function(data) { 
+  // 具体实现代码
+}
+console.log('Query result:', data);
+        };
+ （此内容在中文中无需翻译，直接保留原样
+  （此标签在中文中通常不翻译，保持原
+    </html>
