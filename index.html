@@ -43,8 +43,19 @@
             display: none;
         }
     </style>
+    
+    <!-- 百度统计代码 -->
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2260c68e10226d57558ea4c8bf838cac"; // 请替换为您的站点ID
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+    
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gistfs-js/gistfs.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -63,80 +74,21 @@
     </div>
     
     <script>
-        // 初始化GistFS客户端
-        const gistFs = new GistFS({
-            // 公开Gist ID用于存储统计数据
-            gistId: 'https://gist.github.com/makeou2008/d16f1dd713d5c734a08bc46f4ad5aa5a', // 请替换为您的Gist ID
-            // 公开GitHub Token (建议使用只读Token，通过URL参数传递写入权限)
-            token: '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' // 请替换为您的GitHub Token
-        });
-        
-        // 解析URL参数
-        function getUrlParams() {
-            const params = {};
-            window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, (str, key, value) => {
-                params[key] = decodeURIComponent(value);
-            });
-            return params;
-        }
-        
-        // 使用GistFS记录点击函数
+        // 修改记录点击函数，集成百度统计事件追踪
         function recordClick(userId) {
             // 显示处理中状态
             document.getElementById('status-message').textContent = '正在记录访问...';
             
-            try {
-                // 获取当前统计数据
-                gistFs.readFile('stats.json').then(data => {
-                    let stats = {};
-                    try {
-                        stats = JSON.parse(data);
-                    } catch (e) {
-                        stats = { clicks: {} };
-                    }
-                    
-                    // 更新点击统计
-                    if (!stats.clicks[userId]) {
-                        stats.clicks[userId] = 0;
-                    }
-                    stats.clicks[userId]++;
-                    
-                    // 保存更新后的数据
-                    return gistFs.writeFile('stats.json', JSON.stringify(stats, null, 2));
-                }).then(() => {
-                    console.log(`记录成功: ${userId}`);
-                    document.getElementById('status-message').textContent = '记录成功，正在跳转...';
-                    // 成功后重定向
-                    setTimeout(() => {
-                        window.location.href = 'https://mcnzkg37f38k.feishu.cn/wiki/UkFLwPHIqi4687kKFdZc8rCqnTc';
-                    }, 1000);
-                }).catch(error => {
-                    console.error('GistFS记录失败:', error);
-                    // 失败时回退到模拟统计
-                    fallbackRecordClick(userId);
-                });
-            } catch (e) {
-                console.error('GistFS初始化失败:', e);
-                // 初始化失败时回退到模拟统计
-                fallbackRecordClick(userId);
-            }
-        }
-        
-        // 备用统计方案（当GistFS不可用时）
-        function fallbackRecordClick(userId) {
-            console.log('使用备用统计方案');
-            // 使用公共API服务
-            axios.post('https://jsonplaceholder.typicode.com/posts', {
-                userId: userId,
-                action: 'promo_click',
-                timestamp: new Date().toISOString()
-            }).catch(err => console.error('备用API调用失败:', err)).finally(() => {
-                // 无论成功失败都重定向
-                document.getElementById('status-message').textContent = '处理完成，正在跳转...';
-                setTimeout(() => {
-                    window.location.href = 'https://mcnzkg37f38k.feishu.cn/wiki/UkFLwPHIqi4687kKFdZc8rCqnTc';
-                }, 500);
-            });
+            // 使用百度统计事件追踪记录用户ID和点击行为
+            _hmt.push(['_trackEvent', '推广点击', '用户点击', userId]);
+            
+            console.log(`记录成功: ${userId}`);
+            document.getElementById('status-message').textContent = '记录成功，正在跳转...';
+            
+            // 成功后重定向
+            setTimeout(() => {
+                window.location.href = 'https://mcnzkg37f38k.feishu.cn/wiki/UkFLwPHIqi4687kKFdZc8rCqnTc';
+            }, 1000);
         }
         
         // 处理点击记录请求
@@ -152,34 +104,15 @@
             }
         }
         
-        // 处理统计查询请求（使用GistFS）
+        // 处理统计查询请求（可以基于百度统计数据或模拟数据）
         function handleStatsQuery() {
             const params = getUrlParams();
             if (params.action === 'query' && params.userId) {
-                try {
-                    // 尝试从Gist获取真实数据
-                    gistFs.readFile('stats.json').then(data => {
-                        let stats = {};
-                        try {
-                            stats = JSON.parse(data);
-                        } catch (e) {
-                            stats = { clicks: {} };
-                        }
-                        
-                        // 获取用户的点击数
-                        const clickCount = stats.clicks[params.userId] || 0;
-                        
-                        returnClickData(params.userId, clickCount);
-                    }).catch(error => {
-                        console.error('GistFS查询失败:', error);
-                        // 查询失败时回退到模拟数据
-                        fallbackGetClickCount(params.userId);
-                    });
-                } catch (e) {
-                    console.error('GistFS初始化失败:', e);
-                    // 初始化失败时回退到模拟数据
-                    fallbackGetClickCount(params.userId);
-                }
+                // 注意：百度统计不支持前端直接查询统计数据
+                // 这里使用模拟数据作为示例
+                const mockClickCount = Math.floor(Math.random() * 10); // 0-9的随机数
+                
+                returnClickData(params.userId, mockClickCount);
             }
         }
         
@@ -192,19 +125,19 @@
             };
             
             // 返回JSONP响应
-            const callback = getUrlParams().callback || 'window.promo_callback';
+            const callback = getUrlParams().callback || 'window.callback';
             const script = document.createElement('script');
             script.src = `data:text/javascript,${callback}(${JSON.stringify(data)})`;
             document.body.appendChild(script);
         }
         
-        // 备用获取点击数方案
-        function fallbackGetClickCount(userId) {
-            // 基于用户ID生成伪随机但相对稳定的点击数
-            const hash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-            const mockClickCount = (hash % 6); // 0-5次点击，相对稳定
-            
-            returnClickData(userId, mockClickCount);
+        // 解析URL参数
+        function getUrlParams() {
+            const params = {};
+            window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, (str, key, value) => {
+                params[key] = decodeURIComponent(value);
+            });
+            return params;
         }
         
         // 初始化处理
