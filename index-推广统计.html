@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>秒达V7.0推广统计</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #f5f5f5;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .status-message {
+            font-size: 18px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .loading {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .progress {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .hidden {
+            display: none;
+        }
+        .action-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 20px 0;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .action-button:hover {
+            background-color: #45a049;
+        }
+        .promo-stats {
+            font-size: 16px;
+            margin: 20px 0;
+        }
+        .share-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .share-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .copy-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .copy-button:hover {
+            background-color: #0b7dda;
+        }
+        .qr-code {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>秒达V7.0 - 推广统计</h1>
+        
+        <!-- 主状态消息区域 -->
+        <div id="status-message" class="status-message loading">正在处理...</div>
+        
+        <!-- 统计信息区域 -->
+        <div id="stats-section" class="promo-stats hidden">
+            <p>您的推广统计信息：</p>
+            <p><strong>已推广用户数：</strong><span id="click-count">0</span> / 3</p>
+            <p><strong>推广状态：</strong><span id="promo-status">进行中</span></p>
+            <p id="progress-message">继续分享给好友，完成3个用户的推广即可解锁更多功能！</p>
+        </div>
+        
+        <!-- 解锁按钮区域 -->
+        <div id="unlock-section" class="hidden">
+            <p>🎉 恭喜！您已成功推广3位用户</p>
+            <a href="https://your-tools-url.com" target="_blank" class="action-button">更多免费实用工具请点击</a>
+        </div>
+        
+        <!-- 分享链接生成区域 -->
+        <div id="share-section" class="share-section hidden">
+            <h3>生成您的专属推广链接</h3>
+            <p>复制下方链接分享给好友：</p>
+            <div style="display: flex;">
+                <input type="text" id="share-link" class="share-input" readonly>
+                <button onclick="copyShareLink()" class="copy-button">复制</button>
+            </div>
+            <p id="copy-success" class="hidden" style="color: green;">复制成功！</p>
+        </div>
+    </div>
+
+    <script>
+        // 生成UUID函数
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+        
+        // 获取URL参数
+        function getUrlParams() {
+            const params = {};
+            window.location.search.substring(1).split('&').forEach(param => {
+                const [key, value] = param.split('=');
+                params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+            });
+            return params;
+        }
+        
+        // 从localStorage获取或生成用户ID
+        function getOrCreateUserId() {
+            let userId = localStorage.getItem('promo_user_id');
+            if (!userId) {
+                userId = generateUUID();
+                localStorage.setItem('promo_user_id', userId);
+            }
+            return userId;
+        }
+        
+        // 生成分享链接
+        function generateShareLink(userId) {
+            const baseUrl = window.location.origin + window.location.pathname;
+            const targetUrl = encodeURIComponent('https://mcnzkg37f38k.feishu.cn/wiki/UkFLwPHIqi4687kKFdZc8rCqnTc');
+            return `${baseUrl}?action=record&userId=${userId}&target=${targetUrl}`;
+        }
+        
+        // 复制分享链接
+        function copyShareLink() {
+            const shareLink = document.getElementById('share-link').value;
+            navigator.clipboard.writeText(shareLink).then(() => {
+                const successMsg = document.getElementById('copy-success');
+                successMsg.classList.remove('hidden');
+                setTimeout(() => {
+                    successMsg.classList.add('hidden');
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                alert('复制失败，请手动复制链接');
+            });
+        }
+        
+        // 初始化处理：根据URL参数执行不同操作
+        function init() {
+            const params = getUrlParams();
+            const action = params.action || 'default';
+            const userId = params.userId;
+            const target = params.target ? decodeURIComponent(params.target) : 'https://mcnzkg37f38k.feishu.cn/wiki/UkFLwPHIqi4687kKFdZc8rCqnTc';
+            const callback = params.callback;
+            
+            // 处理查询统计数据请求（JSONP格式）
+            if (action === 'query' && userId) {
+                handleStatsQuery(userId, callback);
+                return;
+            }
+            
+            // 处理记录点击请求
+            if (action === 'record' && userId) {
+                handleRecordClick(userId, target);
+                return;
+            }
+            
+            // 显示默认界面
+            showDefaultUI();
+        }
+        
+        // 处理统计数据查询（JSONP格式响应）
+        function handleStatsQuery(userId, callback) {
+            const statsData = getStatsData(userId);
+            
+            // 构建JSONP响应
+            const response = `
+                ${callback || 'window.callback'}({
+                    "userId": "${statsData.userId}",
+                    "clickCount": ${statsData.clickCount},
+                    "isUnlocked": ${statsData.isUnlocked},
+                    "lastUpdated": "${statsData.lastUpdated}"
+                })
+            `;
+            
+            // 设置响应头并返回JSONP数据
+            document.write(response);
+            document.close();
+        }
+        
+        // 处理记录点击请求
+        function handleRecordClick(userId, targetUrl) {
+            // 生成访客标识（基于浏览器指纹和随机数，确保不同电脑有不同标识）
+            const visitorId = generateVisitorId();
+            
+            // 保存点击记录
+            const userData = saveClickRecord(userId, visitorId);
+            
+            console.log(`已记录用户${userId}的点击，当前点击数: ${userData.clickCount}`);
+            
+            // 直接重定向到目标URL
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 1000);
+        }
+        
+        // 显示默认界面
+        function showDefaultUI() {
+            document.getElementById('status-message').classList.remove('loading');
+            document.getElementById('status-message').classList.add('success');
+            document.getElementById('status-message').textContent = '欢迎使用秒达V7.0推广统计页面';
+            
+            const userId = getOrCreateUserId();
+            const shareLink = generateShareLink(userId);
+            document.getElementById('share-link').value = shareLink;
+            
+            // 显示统计信息
+            const statsData = getStatsData(userId);
+            document.getElementById('click-count').textContent = statsData.clickCount;
+            document.getElementById('promo-status').textContent = statsData.isUnlocked ? '已完成' : '进行中';
+            
+            if (statsData.isUnlocked) {
+                document.getElementById('unlock-section').classList.remove('hidden');
+            } else {
+                document.getElementById('stats-section').classList.remove('hidden');
+            }
+            
+            document.getElementById('share-section').classList.remove('hidden');
+        }
+        
+        // 保存点击记录（使用localStorage存储）
+        function saveClickRecord(userId, visitorId) {
+            // 获取或创建用户的点击记录
+            let userData = localStorage.getItem(`promo_stats_${userId}`);
+            if (userData) {
+                userData = JSON.parse(userData);
+            } else {
+                userData = {
+                    userId: userId,
+                    clickCount: 0,
+                    uniqueVisitors: [],
+                    lastUpdated: new Date().toISOString(),
+                    isUnlocked: false
+                };
+            }
+            
+            // 检查访客是否已经记录过（使用设备标识）
+            if (!userData.uniqueVisitors.includes(visitorId)) {
+                userData.uniqueVisitors.push(visitorId);
+                userData.clickCount = userData.uniqueVisitors.length;
+                userData.lastUpdated = new Date().toISOString();
+                userData.isUnlocked = userData.clickCount >= 3;
+                
+                // 保存更新后的数据
+                localStorage.setItem(`promo_stats_${userId}`, JSON.stringify(userData));
+                
+                console.log(`用户${userId}的点击记录已更新，当前点击数: ${userData.clickCount}`);
+            }
+            
+            return userData;
+        }
+        
+        // 获取统计数据
+        function getStatsData(userId) {
+            const userData = localStorage.getItem(`promo_stats_${userId}`);
+            if (userData) {
+                return JSON.parse(userData);
+            }
+            return {
+                userId: userId,
+                clickCount: 0,
+                uniqueVisitors: [],
+                lastUpdated: new Date().toISOString(),
+                isUnlocked: false
+            };
+        }
+        
+        // 生成简单的访客标识
+        function generateVisitorId() {
+            // 使用浏览器指纹（简化版）作为访客标识
+            const fingerprint = [
+                navigator.userAgent,
+                navigator.language,
+                screen.width + 'x' + screen.height,
+                new Date().getTimezoneOffset()
+            ].join('|');
+            
+            // 简单的哈希函数
+            let hash = 0;
+            for (let i = 0; i < fingerprint.length; i++) {
+                const char = fingerprint.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            
+            return 'visitor_' + Math.abs(hash).toString(16);
+        }
+        
+        // 记录点击并跳转
+        function recordClickAndRedirect(userId, targetUrl) {
+            const visitorId = generateVisitorId();
+            const statsData = saveClickRecord(userId, visitorId);
+            
+            document.getElementById('status-message').textContent = '记录成功，正在跳转...';
+            
+            // 延时跳转，确保记录完成
+            setTimeout(() => {
+                window.location.href = decodeURIComponent(targetUrl || 'https://mcnzkg37f38k.feishu.cn/wiki/UkFLwPHIqi4687kKFdZc8rCqnTc');
+            }, 1000);
+        }
+        
+        // 显示统计信息
+        function displayStats(userId) {
+            const statsData = getStatsData(userId);
+            
+            if (statsData.isUnlocked || statsData.clickCount >= 3) {
+                // 显示解锁状态
+                document.getElementById('status-message').textContent = '🎉 恭喜！您已成功推广3位用户';
+                document.getElementById('status-message').className = 'status-message success';
+                document.getElementById('unlock-section').classList.remove('hidden');
+            } else {
+                // 显示进度
+                document.getElementById('status-message').textContent = '您的推广进度';
+                document.getElementById('status-message').className = 'status-message progress';
+                document.getElementById('stats-section').classList.remove('hidden');
+                
+                document.getElementById('click-count').textContent = statsData.clickCount;
+                document.getElementById('promo-status').textContent = '进行中';
+                document.getElementById('progress-message').textContent = 
+                    `继续分享给好友，还差 ${3 - statsData.clickCount} 位用户即可解锁更多功能！`;
+            }
+            
+            // 显示分享区域
+            document.getElementById('share-section').classList.remove('hidden');
+            document.getElementById('share-link').value = generateShareLink(userId);
+        }
+        
+        // 主逻辑
+        function main() {
+            const params = getUrlParams();
+            
+            if (params.action === 'record' && params.userId) {
+                // 记录点击并跳转
+                recordClickAndRedirect(params.userId, params.target);
+            } else {
+                // 显示统计页面
+                const userId = getOrCreateUserId();
+                displayStats(userId);
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 自动初始化并处理URL参数
+            init();
+        });
+        
+        // 调试辅助功能
+        window.promoDebug = {
+            clearAll: function() {
+                // 清除所有统计数据
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('promo_stats_') || key === 'promo_user_id') {
+                        localStorage.removeItem(key);
+                    }
+                }
+                alert('所有统计数据已清除');
+                location.reload();
+            },
+            listStats: function() {
+                // 列出所有统计数据
+                const results = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('promo_stats_')) {
+                        results[key] = JSON.parse(localStorage.getItem(key));
+                    }
+                }
+                console.table(results);
+                return results;
+            },
+            testPromote: function() {
+                // 测试推广功能（增加点击数）
+                const userId = getOrCreateUserId();
+                const statsData = getStatsData(userId);
+                
+                // 添加测试访客
+                const testVisitorIds = ['test_visitor_1', 'test_visitor_2', 'test_visitor_3'];
+                let updated = false;
+                
+                for (const visitorId of testVisitorIds) {
+                    if (!statsData.uniqueVisitors.includes(visitorId)) {
+                        statsData.uniqueVisitors.push(visitorId);
+                        updated = true;
+                    }
+                }
+                
+                if (updated) {
+                    statsData.clickCount = statsData.uniqueVisitors.length;
+                    statsData.lastUpdated = new Date().toISOString();
+                    statsData.isUnlocked = statsData.clickCount >= 3;
+                    
+                    localStorage.setItem(`promo_stats_${userId}`, JSON.stringify(statsData));
+                    alert(`测试推广成功！当前点击数: ${statsData.clickCount}`);
+                    location.reload();
+                } else {
+                    alert('已经添加过测试数据');
+                }
+            }
+        };
+    </script>
+</body>
+</html>
